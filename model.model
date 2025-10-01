@@ -1,0 +1,191 @@
+% ======================================
+% Basic Quarterly Projection Model (QPM)
+% ======================================
+
+!transition_variables
+'Real GDP (100*log)'                                               L_GDP
+'Trend in Real GDP (100*log)'                                      L_GDP_BAR
+'Output Gap (in %)'                                                L_GDP_GAP
+'Quarterly Growth in Real GDP(in % pa)'                            DLA_GDP
+'Real GDP Growth YoY (in % pa)'                                    D4L_GDP
+'Real GDP Trend Growth QoQ annualized (in % pa)'                   DLA_GDP_BAR
+
+'Real Monetary Condition Index (in % pa)'                          MCI
+
+'CPI (level, 100*log)'                                             L_CPI
+'CPI Inflation QoQ annualized (in % pa)'                           DLA_CPI
+'Expected CPI Inflation QoQ annualized (in % pa)'                  E_DLA_CPI
+'CPI Inflation YoY (in % pa)'                                      D4L_CPI
+'Inflation Target (in % pa)'                                       D4L_CPI_TAR
+
+'Real Marginal Cost  (in %)'                                       RMC
+
+'Nominal Exchange Rate (LCY/FCY, 100*log)'                         L_S
+'Nominal Exch. Rate Depreciation QoQ annualized (in % pa)'         DLA_S
+'Nominal Exch. Rate Depreciation YoY (in % pa)'                    D4L_S
+'Country Risk Premium (in % pa)'                                   PREM
+
+'Nominal Policy Interest Rate (in % pa)'                           RS
+'Real Interest Rate (in % pa)'                                     RR
+'Trend Real Interest Rate (in % pa)'                               RR_BAR
+'Real Interest Rate Gap (in %)'                                    RR_GAP
+'Nominal Policy Neutral Interest Rate (in % pa)'                   RSNEUTRAL
+
+'Real Exchange Rate (level, 100*log)'                              L_Z
+'Trend Real Exchange Rate (level, 100*log)'                        L_Z_BAR
+'Real Exchange Rate Gap (in %)'                                    L_Z_GAP
+'Real Exchange Rate Depreciation QoQ annualized (in % pa)'         DLA_Z
+'Trend Real Exchange Rate Depreciation QoQ annualized(in % pa)'    DLA_Z_BAR
+
+'Foreign Output Gap (in %)'                                        L_GDP_RW_GAP
+'Foreign Nominal Interest Rate (in % pa)'                          RS_RW
+'Foreign Real Interest Rate (in % pa)'                             RR_RW 
+'Foreign Real Interest Rate Trend (in % pa)'                       RR_RW_BAR
+'Foreign Real Interest Rate Gap (in %)'                            RR_RW_GAP
+'Foreign CPI (level, 100*log)'                                     L_CPI_RW
+'Foreign Inflation QoQ annualized (in % pa)'                       DLA_CPI_RW
+
+% ------------------------------------------------------------------------------- %
+!transition_shocks
+'Shock: Output gap (demand)'                                       SHK_L_GDP_GAP
+'Shock: CPI inflation (cost-push)'                                 SHK_DLA_CPI 
+'Shock: Exchange rate (UIP)'                                       SHK_L_S 
+'Shock: Interest rate (monetary policy)'                           SHK_RS 
+'Shock: Inflation target'                                          SHK_D4L_CPI_TAR
+
+'Shock: Real interest rate'                                        SHK_RR_BAR 
+'Shock: Real exchange rate depreciation'                           SHK_DLA_Z_BAR 
+'Shock: Potential GDP growth'                                      SHK_DLA_GDP_BAR
+
+'Shock: Foreign output gap'                                        SHK_L_GDP_RW_GAP 
+'Shock: Foreign nominal interest rate'                             SHK_RS_RW 
+'Shock: Foreign inflation'                                         SHK_DLA_CPI_RW 
+'Shock: Foreign real interest rate'                                SHK_RR_RW_BAR
+
+% ------------------------------------------------------------------------------- %
+!parameters
+b1 b2 b3 b4
+a1 a2 a3
+e1
+g1 g2 g3
+
+rho_D4L_CPI_TAR
+rho_DLA_Z_BAR 
+rho_RR_BAR
+rho_DLA_GDP_BAR
+ 
+rho_L_GDP_RW_GAP
+rho_RS_RW 
+rho_DLA_CPI_RW
+rho_RR_RW_BAR
+
+ss_D4L_CPI_TAR
+ss_DLA_Z_BAR
+ss_RR_BAR 
+ss_DLA_GDP_BAR
+
+ss_DLA_CPI_RW 
+ss_RR_RW_BAR
+
+%% ------------------------------------------------------------------------------- %
+!transition_equations
+%% === Aggregate demand (the IS curve) ===
+L_GDP_GAP = b1*L_GDP_GAP{-1} - b2*MCI + b3*L_GDP_RW_GAP + SHK_L_GDP_GAP;
+
+%-- Real monetary conditions index
+MCI = b4*RR_GAP + (1-b4)*(- L_Z_GAP);
+
+%% === Inflation (the Phillips curve) ===
+DLA_CPI =  a1*DLA_CPI{-1} + (1-a1)*DLA_CPI{+1} + a2*RMC + SHK_DLA_CPI;
+
+%-- Real marginal cost
+RMC = a3*L_GDP_GAP + (1-a3)*L_Z_GAP;
+
+%- expected inflation
+E_DLA_CPI = DLA_CPI{+1};
+
+%% === Monetary policy reaction function (a forward-looking Taylor-type Rule) ===
+RS = g1*RS{-1} + (1-g1)*(RSNEUTRAL + g2*(D4L_CPI{+4} - D4L_CPI_TAR{+4}) + g3*L_GDP_GAP) + SHK_RS;
+
+%- Neutral nominal policy interest rate
+RSNEUTRAL = RR_BAR + D4L_CPI{+1};
+
+%% === Modified Uncovered Interest Rate Parity (UIP) condition ===
+L_S = (1-e1)*L_S{+1} + e1*(L_S{-1} + 2/4*(D4L_CPI_TAR - ss_DLA_CPI_RW + DLA_Z_BAR)) + (- RS + RS_RW + PREM)/4 + SHK_L_S;
+
+%% === Definitions ===
+
+%- Fisher equation (RIR)
+RR = RS - D4L_CPI{+1};
+
+%- Real exchange rate (RER)
+L_Z = L_S + L_CPI_RW - L_CPI;
+
+%- Long-term version of UIP (consistency of trends)
+DLA_Z_BAR{+1} = RR_BAR - RR_RW_BAR - PREM;
+
+%% === Identities ===
+DLA_GDP_BAR = 4*(L_GDP_BAR - L_GDP_BAR{-1});
+DLA_Z_BAR   = 4*(L_Z_BAR - L_Z_BAR{-1});
+DLA_Z       = 4*(L_Z - L_Z{-1});
+DLA_GDP     = 4*(L_GDP - L_GDP{-1});
+DLA_CPI     = 4*(L_CPI - L_CPI{-1});
+DLA_S       = 4*(L_S - L_S{-1});
+
+D4L_GDP     = L_GDP - L_GDP{-4};
+D4L_CPI     = L_CPI - L_CPI{-4};
+D4L_S       = L_S - L_S{-4};
+
+%% === Gaps ===
+RR_GAP    = RR - RR_BAR;
+L_Z_GAP   = L_Z - L_Z_BAR;
+L_GDP_GAP = L_GDP - L_GDP_BAR;
+
+%% === Trends ===
+D4L_CPI_TAR = rho_D4L_CPI_TAR*D4L_CPI_TAR{-1} + (1-rho_D4L_CPI_TAR)*ss_D4L_CPI_TAR + SHK_D4L_CPI_TAR;
+DLA_Z_BAR   = rho_DLA_Z_BAR*DLA_Z_BAR{-1} + (1-rho_DLA_Z_BAR)*ss_DLA_Z_BAR + SHK_DLA_Z_BAR;
+RR_BAR      = rho_RR_BAR*RR_BAR{-1} + (1-rho_RR_BAR)*ss_RR_BAR + SHK_RR_BAR;
+DLA_GDP_BAR = rho_DLA_GDP_BAR*DLA_GDP_BAR{-1} + (1-rho_DLA_GDP_BAR)*ss_DLA_GDP_BAR + SHK_DLA_GDP_BAR;
+
+%% === Foreign Sector Equations ===
+L_GDP_RW_GAP = rho_L_GDP_RW_GAP*L_GDP_RW_GAP{-1} + SHK_L_GDP_RW_GAP;
+DLA_CPI_RW   = rho_DLA_CPI_RW*DLA_CPI_RW{-1} + (1-rho_DLA_CPI_RW)*ss_DLA_CPI_RW + SHK_DLA_CPI_RW;
+RS_RW        = rho_RS_RW*RS_RW{-1} + (1-rho_RS_RW)*(RR_RW_BAR + DLA_CPI_RW) + SHK_RS_RW;
+RR_RW_BAR    = rho_RR_RW_BAR*RR_RW_BAR{-1} + (1-rho_RR_RW_BAR)*ss_RR_RW_BAR + SHK_RR_RW_BAR;
+RR_RW        = RS_RW - DLA_CPI_RW;
+RR_RW_GAP    = RR_RW - RR_RW_BAR;
+
+DLA_CPI_RW   = 4*(L_CPI_RW - L_CPI_RW{-1});
+
+%% ------------------------------------------------------------------------------- %
+!measurement_variables
+OBS_L_GDP
+OBS_L_CPI
+OBS_RS
+OBS_L_S
+OBS_D4L_CPI_TAR
+
+OBS_L_GDP_RW_GAP
+OBS_DLA_CPI_RW 
+OBS_RS_RW
+
+!measurement_equations
+OBS_L_GDP = L_GDP;
+OBS_L_CPI = L_CPI;
+OBS_RS    = RS;
+OBS_L_S   = L_S;
+OBS_D4L_CPI_TAR = D4L_CPI_TAR;
+
+OBS_L_GDP_RW_GAP = L_GDP_RW_GAP;
+OBS_DLA_CPI_RW   = DLA_CPI_RW;
+OBS_RS_RW        = RS_RW;
+
+%% ------------------------------------------------------------------------------- %
+Legend
+_GAP        cyclical deviation from a trend
+_BAR        trend (equilibrium)
+ss_         steady-state value  
+DLA_        q-o-q change
+D4L_        y-o-y change  
+_RW         foreign variable
+SHK_        equation residual
