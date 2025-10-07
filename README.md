@@ -2,7 +2,9 @@
 IMF's Quarterly Projection Model
 
 - Credits to IRIS Solutions team [(IRIS Toolbox)](https://github.com/IRIS-Solutions-Team/IRIS-Toolbox)  
-- The codes are obtained from IMFx MPAFx Monetary Policy Analysis and Forecasting on EdX.
+- The codes are obtained from [IMFx MPAFx Monetary Policy Analysis and Forecasting](https://www.imf.org/en/Capacity-Development/Training/ICDTC/Courses/MPAFx) on EdX.
+
+Please go to the site and enroll if you are interested. 
 
 ---
 
