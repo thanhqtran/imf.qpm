@@ -1,10 +1,17 @@
+%%%%%%%%
+%%% FILTRATION
+%%%%%%%%
+
+%% Housekeeping
 clearvars
 close all
 
 addpath utils
 
+%% Read the model
 [m,p,mss] = readmodel();
 
+%% Set variances for Kalman filtration
 p.std_SHK_L_GDP_GAP   = 1;
 p.std_SHK_DLA_GDP_BAR = 0.5;
 
@@ -25,11 +32,14 @@ p.std_SHK_RR_RW_BAR    = 0.5;
 m = assign(m,p);
 m = solve(m);
 
+%% Create model report 
 m=modelreport(m);
 
+%% Data sample
 sdate = qq(1998,1);
 edate = qq(2013,4);
 
+%% Load data
 d = dbload('results/history.csv');
 
 dd.OBS_L_CPI        = d.L_CPI;
@@ -44,17 +54,32 @@ dd.OBS_DLA_CPI_RW   = d.DLA_CPI_RW;
 dd.OBS_L_GDP_RW_GAP = d.L_GDP_RW_GAP;
 dd.OBS_D4L_CPI_TAR  = d.D4L_CPI_TAR;
 
+%% Filtration
+% Input arguments:
+%   m - solved model object
+%   dd - database with observations for measurement variables
+%   sdate:edate - date range to tun the filter
+% Some output arguments:
+%   m_kf - model object
+%   g - output structure with smoother or prediction data
+%   v - estimated variance scale factor
 [m_kf,g,v,delta,pe] = filter(m,dd,sdate:edate);
 
 h = g.mean;
 d = dbextend(d,h);
 
+%% Save the database
+% Database is saved in file 'kalm_his.mat'
 dbsave(d,'results/kalm_his.csv');
 save('results/kalm_his.mat', 'g');
 
+%% Report 
+% full version
 disp('Generating Filtration Report...');
 x = Report.new('Filtration report','visible',true);
 
+%% Figures
+% rng = qq(2012,1):edate;
 rng = sdate:edate;
 sty = struct();
 sty.line.linewidth = 0.5;
@@ -111,11 +136,11 @@ x.series('',[d.L_Z_GAP]);
 x.graph('Foreign GDP Gap','legend',false);
 x.series('',[d.L_GDP_RW_GAP]);
 
-x.graph('Foreign inflation','legend',false); 
-x.series('',[d.DLA_CPI_RW]); 
+x.graph('Foreign inflation','legend',false); % to be added during the video
+x.series('',[d.DLA_CPI_RW]); % to be added during the video
 
-x.graph('Foreign interest rates','legend',false); 
-x.series('',[d.RS_RW]); 
+x.graph('Foreign interest rates','legend',false); % to be added during the video
+x.series('',[d.RS_RW]); % to be added during the video
 
 x.figure('Shocks','subplot',[3,3],'style',sty,'range',rng,'dateformat','YY:P');
 
@@ -193,11 +218,13 @@ x.graph('Output gap decomposition, pp','legend',true);
 x.series('',[d.b1*d.L_GDP_GAP{-1} -d.b2*d.b4*d.RR_GAP d.b2*(1-d.b4)*d.L_Z_GAP d.b3*d.L_GDP_RW_GAP d.SHK_L_GDP_GAP],...
     'legendEntry=',{'Lag','RIR gap','RER gap','Foreign gap','Shock'},'plotfunc',@barcon);
 
-x.figure('Decomposition','subplot',[2,1],'style',sty,'range',rng,'dateformat','YY:P'); 
+x.figure('Decomposition','subplot',[2,1],'style',sty,'range',rng,'dateformat','YY:P'); % to be added during the video
 
-x.graph('MCI decomposition, pp','legend',true); 
-x.series('',[d.b4*d.RR_GAP (1-d.b4)*(-d.L_Z_GAP)],'legendEntry=',{'RIR gap','RER gap'},'plotfunc',@barcon); 
-x.series('',d.MCI,'legendEntry=','MCI'); 
+x.graph('MCI decomposition, pp','legend',true); % to be added during the video
+x.series('',[d.b4*d.RR_GAP (1-d.b4)*(-d.L_Z_GAP)],'legendEntry=',{'RIR gap','RER gap'},'plotfunc',@barcon); % to be added during the video
+x.series('',d.MCI,'legendEntry=','MCI'); % to be added during the video
+
+
 
 x.publish('results/Filtration','display',false);
 disp('Done!!!');

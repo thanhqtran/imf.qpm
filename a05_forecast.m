@@ -1,10 +1,17 @@
+%%%%%%%%%%%%%%%%
+%%% Forecast
+%%%%%%%%%%%%%%%%
+
+%% Housekeeping
 clearvars
 close all
 
 addpath utils
 
+%% Read the model
 [m, p, mss] = readmodel();
 
+%% Set variances -- retaken from 'a03_kalmanfilter.m'
 p.std_SHK_L_GDP_GAP   = 1;
 p.std_SHK_DLA_GDP_BAR = 0.5;
 
@@ -25,32 +32,57 @@ p.std_SHK_RR_RW_BAR    = 0.5;
 m = assign(m, p);
 m = solve(m);
 
+%% Load results from Kalman filtration of the data
 load('results/kalm_his.mat');
 h = g;
 clear g
 
+%% Define the time frame of the forecast
+% Change the time frame depending on you data and forecast period!
 startfcast = get(h.mean.L_GDP_GAP, 'last') + 1;
 endfcast   = qq(2016,4);
 fcastrange = startfcast:endfcast;
 
-simplan = plan(m, fcastrange); 
+%% Plan 
+simplan = plan(m, fcastrange); %plan command creates an object with the name simplan (in setting up the use of tunes below)
 
+% h.mean.RS_RW(qq(2014,1):qq(2014,4)) = [ 0.3   0.3   0.2  0.1];
+% h.mean.RS_RW(qq(2015,1):qq(2015,4)) = [ 0.0   0.0   0.0 -0.1];
+% h.mean.RS_RW(qq(2016,1):qq(2016,4)) = [-0.2  -0.3  -0.3 -0.3];
+% 
+% h.mean.DLA_CPI_RW(qq(2014,1):qq(2014,4)) = [ 0.9  -0.3   0.1 -0.1];
+% h.mean.DLA_CPI_RW(qq(2015,1):qq(2015,4)) = [-0.8   2.4  -0.2 -0.4];
+% h.mean.DLA_CPI_RW(qq(2016,1):qq(2016,4)) = [-1.4   1.5   1.2  1.7];
+% 
+% h.mean.L_GDP_RW_GAP(qq(2014,1):qq(2014,4)) = [-2.0  -1.0  -0.5  0.0];
+% h.mean.L_GDP_RW_GAP(qq(2015,1):qq(2015,4)) = [ 0.7   0.9   0.9  1.0];
+% h.mean.L_GDP_RW_GAP(qq(2016,1):qq(2016,4)) = [ 0.8   0.5   0.2  0.0];
+% 
+% simplan = exogenize(simplan, qq(2014,1):qq(2016,4), {'RS_RW', 'DLA_CPI_RW', 'L_GDP_RW_GAP'});
+% simplan = endogenize(simplan, qq(2014,1):qq(2016,4), {'SHK_RS_RW', 'SHK_DLA_CPI_RW', 'SHK_L_GDP_RW_GAP'});
+
+%% make a forecast
 s = jforecast(m, h, fcastrange, 'plan', simplan, 'anticipate', true);
 
 s.mean = dbextend(h.mean, s.mean);
 s.std = dbextend(h.std, s.std);
 
+%%
 dbsave(s.mean,'results/baseline.csv');
 
+%% Graphs and Tables
 Tablerng = startfcast-3:startfcast+11;
 Plotrng = startfcast-5:startfcast+11;
 Histrng = startfcast-5:startfcast-1;
 
+% Specify country and units for exchange rate
 country = 'Baseline';
 exchange = 'CZK/EUR';
 
+% Report
 x = Report.new('Baseline');
 
+% Figures
 sty = struct();
 sty.line.linewidth = 1.5;
 sty.line.linestyle = {'-';'--';':'};
@@ -62,13 +94,14 @@ band_probs = [0.9 0.6 0.3];
 x.figure('Forecast - Main Indicators', 'subplot', [3,2], 'style', sty, 'range', Plotrng, 'dateformat', 'YYYY:P');
 x.graph('Inflation, yoy in %');
 x.fanchart('', s.mean.D4L_CPI, s.std.D4L_CPI, band_probs);
-
+% x.highlight('', Histrng);
 x.graph('Nominal interest rate, %');
 x.fanchart('', s.mean.RS , s.std.RS, band_probs);
 x.graph('Real GDP, yoy in %');
 x.fanchart('', s.mean.D4L_GDP, s.std.D4L_GDP, band_probs);
 x.graph('Nominal exchange rate depreciation, yoy %');
 x.fanchart('', s.mean.D4L_S, s.std.D4L_S, band_probs);
+
 
 x.figure('Forecast - Main Indicators', 'subplot', [3,2], 'style', sty, 'range', Plotrng, 'dateformat', 'YYYY:P');
 
@@ -101,8 +134,13 @@ x.series('RIR gap', s.mean.RR_GAP );
 x.series('RER gap', s.mean.L_Z_GAP);
 x.vline('', startfcast-1);
 
+% x.graph(['Nominal Exchange Rate - ' exchange], 'legend', false);
+% x.series('', exp(s.mean.L_S/100));
+% x.vline('', startfcast-1);
+% 
 x.pagebreak();
 
+% Tables
 TableOptions = {'range', Tablerng, 'vline', startfcast-1, 'decimal', 1, 'dateformat', 'YYYY:P',...
     'long', true, 'longfoot', '---continued', 'longfootposition', 'right'};
 
@@ -125,7 +163,7 @@ x.subheading('Real Economy');
   x.series('Output Gap', s.mean.L_GDP_GAP, 'units', '%');
   x.series('GDP', s.mean.DLA_GDP, 'units', '% (q-o-q)');
   x.series('Potential GDP', s.mean.DLA_GDP_BAR, 'units', '% (q-o-q)');
-
+  
 x.subheading('');
 x.subheading('Monetary Conditions');
   x.series('Monetary Conditions', s.mean.MCI, 'units', '%');
@@ -135,6 +173,7 @@ x.subheading('Monetary Conditions');
 x.pagebreak();
 x.table('Forecast - Decompositions', TableOptions{:});
 
+ 
 x.subheading('');
 x.subheading('Headline Inflation');
   x.series('Headline Inflation', s.mean.DLA_CPI, 'units', '%');
@@ -154,7 +193,7 @@ x.subheading('Ouptut Gap Decomposition');
   x.series('Real Exchange Rate', -s.mean.b2*(1-s.mean.b4)*(-s.mean.L_Z_GAP), 'units', 'p.p.');
   x.series('Foreign Output Gap', s.mean.b3*s.mean.L_GDP_RW_GAP, 'units', 'p.p.');
   x.series('Shock', s.mean.SHK_L_GDP_GAP, 'units', 'p.p.');
-
+  
 x.subheading('');
 x.subheading('Supply Side Assumptions');
   x.series('Potential Output', s.mean.DLA_GDP_BAR, 'units', '% (q-o-q)');
@@ -164,7 +203,7 @@ x.subheading('Supply Side Assumptions');
   x.subheading('');
   x.series('Eq. Real Exchange Rate', s.mean.DLA_Z_BAR, 'units', '% (q-o-q)');
   x.series('', (s.mean.L_Z_BAR-s.mean.L_Z_BAR{-4}), 'units', '% (y-o-y)'); 
-
+  
 x.pagebreak();
 x.table('Forecast - Policy Decomposition', TableOptions{:});
 
@@ -181,7 +220,7 @@ x.subheading('Monetary Conditions Decomposition');
   x.series('Monetary Conditions', s.mean.MCI, 'units', '%');
   x.series('Real Interest Rate Gap', s.mean.b4*s.mean.RR_GAP, 'units', 'p.p.');
   x.series('Real Exchange Rate Gap', (1-s.mean.b4)*(-s.mean.L_Z_GAP), 'units', 'p.p');
-
+  
 x.table('Forecast - Foreign Variables', TableOptions{:});
 
 x.subheading('European Monetary Union -- EA19');
@@ -206,3 +245,5 @@ x.series('Shock: Foreign real interest rate', s.mean.SHK_RR_RW_BAR);
 
 x.publish('results/Forecast', 'display', false);
 disp('Done!');
+    
+
