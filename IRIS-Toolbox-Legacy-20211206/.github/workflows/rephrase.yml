@@ -1,0 +1,48 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Update rephrase plugin
+
+on:
+  #push:
+    #branches: [master]
+  repository_dispatch:
+    types: [rephrase-release-event]
+    
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clone rephrase dist
+      uses: actions/checkout@v2
+      with:
+        repository: OGResearch/rephrase
+        ref: dist
+        path: rephrase
+        token: ${{ secrets.PAT_ALL_SCOPES }}
+        fetch-depth: 0
+        
+    - name: Get short hash of latest rephrase commit
+      id: rephrase_commit
+      run: |
+        cd $GITHUB_WORKSPACE/rephrase
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"      
+                
+    - name: Clone iris-toolbox master
+      uses: actions/checkout@v2
+      with:
+        path: iris
+        fetch-depth: 0
+        
+    - name: Update subtree, push new commit
+      run: |
+        cd $GITHUB_WORKSPACE/iris
+        git config --global user.email "jaromir.benes@gmail.com"
+        git config --global user.name "Jaromir Benes"        
+        git subtree pull -P Plugins/.rephrase ../rephrase dist -m "Update rephrase" --squash
+        #git add .
+        #git commit -m "Update rephrase subtree from dist ${{ steps.rephrase_commit.outputs.sha_short }}"
+        git push
+        

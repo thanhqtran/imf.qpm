@@ -1,0 +1,94 @@
+name: Update pre-r2019b branch
+
+on:
+  push:
+    tags:
+      - 'Legacy-Ready-*'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Update the pre-r2019b branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+          ref: master
+          path: iris-toolbox      
+
+      - name: Merge master into pre-r2019 
+        run: |
+          cd $GITHUB_WORKSPACE/iris-toolbox
+          
+          git config user.email "jaromir.benes@gmail.com"
+          git config user.name "Jaromir Benes"
+          
+          git switch pre-r2019b
+
+          git merge -X theirs master
+          git status
+          
+      - name: Remove files deleted from master but modified previously in pre-r2019b
+        run: |
+          # Files that differed between master and pre-r2019b and were deleted in
+          # master will not be resolved (i.e. deleted) in pre-r2019b. Do this
+          # manually here:
+          # * Look up names of files that are U=unmerged
+          # * Remove these files
+
+          cd $GITHUB_WORKSPACE/iris-toolbox
+          files_to_remove=$(git diff --name-only --diff-filter=U)
+          if [[ $files_to_remove ]]; then
+             git rm $files_to_remove
+             git status
+          fi
+          
+      - name: Make sure all r2019a/r2019b switches are set correctly
+        run: |
+          for f in $( grep -rl --include=*.m "% [><]=R2019[ab]" $GITHUB_WORKSPACE/iris-toolbox); do
+              echo $f
+              sed -i 's/\r//g' $f
+              cp $f temp.orig
+              tr '\n' '\v' < temp.orig > temp.replaced
+              sed -i 's/% >=R2019b[ ]*\v\([ ]*\)%(/% >=R2019b\v\1%{/g' temp.replaced
+              sed -i 's/%)\v\([ ]*\)% >=R2019b[ ]*/%}\v\1% >=R2019b/g' temp.replaced
+              sed -i 's/% <=R2019a[ ]*\v\([ ]*\)%{/% <=R2019a\v\1%(/g' temp.replaced
+              sed -i 's/%}\v\([ ]*\)% <=R2019a[ ]*/%)\v\1% <=R2019a/g' temp.replaced
+              tr '\v' '\n' < temp.replaced > temp.final
+              # cat temp.final
+              cp temp.final $f
+              rm temp.orig temp.replaced temp.final
+          done
+
+      - name: Commit, tag and push
+        run: |
+          cd $GITHUB_WORKSPACE/iris-toolbox        
+          git status
+          git add -u .
+          git status
+          files_to_commit=$(git diff --cached --name-status)
+          if [[ $files_to_commit ]]; then
+            git commit -m "Update pre-r2019b"
+          fi
+          
+          trigger_ref="${{ github.ref }}" 
+          echo "Triggering ref: $trigger_ref"
+          
+          # If github.ref == "refs/heads/branch_name" (instead of the tag), this means the action was triggered manually
+          # Assign the release number "11111111" 
+          if [[ "_$trigger_ref" == "_refs/heads/"* ]]; then
+            release_number="11111111"
+          else
+            release_number="$trigger_ref"
+            release_number="${release_number#'refs/tags/'}"
+            release_number="${release_number#'Legacy-Ready-'}"
+          fi
+          echo "Release number: $release_number"
+          
+          git tag "Legacy-$release_number"
+          git push origin pre-r2019b --tags
+          git status
