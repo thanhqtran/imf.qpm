@@ -19,6 +19,16 @@ The script `readmodel_est.m` will replace `readmodel.m` in this case.
 Benes later added a System-priors approach ([here](https://github.com/jaromir-benes/nifi-workshop-202109)), which can only be implemented with IRIS 2021 onwards. 
 If you want to try this approach, run `a07_estimate_system` in the repo and remember to use IRIS 2021 instead of IRIS 2018.
 
+## Comparison
+
+The calibrated model
+
+![](https://github.com/thanhqtran/imf.qpm/blob/76b631445f117985a0264d72f0cca351faadcfaa/calibrate.png)
+
+The estimated model
+
+![](https://github.com/thanhqtran/imf.qpm/blob/76b631445f117985a0264d72f0cca351faadcfaa/estimate.png)
+
 ## How to run stuff
 
 - The calibrated model (IMF's EdX version)
