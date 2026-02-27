@@ -12,10 +12,12 @@ Please go to the site and enroll if you are interested.
 
 In the original codes provided by IMF, the model used is a calibrated one. Calibrating a large system such as the QPM can be challenging and requires a lot of tedious trial and errors. In a lot of cases, we also want to be able to estimate the parameters so that the output is as close to the data as possible.
 
-In this repo, I added three scripts that do exactly this, with different methods, based on [A Cook-Book of IRIS](https://www.mv.helsinki.fi/home/ajripatt/opetus/metrics/IRIS_cookbook.pdf#page=49.24) by Jaromir Benes & Martin Fukac. 
-I adapted the codes there to produce `a07_estimate_mle` and `a07_estimate_bayesian` that perform the estimation and then save the posterior mean into `pE`.
+In this repo, I added three scripts that do exactly this, with 3 methods (maximum likelihood, Bayesian, and System Priors). 
+The approach is based on [A Cook-Book of IRIS](https://www.mv.helsinki.fi/home/ajripatt/opetus/metrics/IRIS_cookbook.pdf#page=49.24) by Jaromir Benes & Martin Fukac. 
+I adapted the codes there to produce `a07_estimate_mle` and `a07_estimate_bayesian` that perform the relevant estimation and then save the posterior mean into `pE`.
+The script `readmodel_est.m` will replace `readmodel.m` in this case.
 Benes later added a System-priors approach ([here](https://github.com/jaromir-benes/nifi-workshop-202109)), which can only be implemented with IRIS 2021 onwards. 
-This is `a07_estimate_system` in the repo.
+If you want to try this approach, run `a07_estimate_system` in the repo and remember to use IRIS 2021 instead of IRIS 2018.
 
 ## How to run stuff
 
