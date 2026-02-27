@@ -58,10 +58,10 @@ p.a3 = 0.7; % a3 varies between 0.9 (for a relatively more closed economy) to 0.
 p.g1 = 0.7; % g1 varies from 0 (no persistence) to 0.8 ("wait and see" policy)
 
 % policy reactiveness: the weight put on inflation by the policy-makers 
-p.g2 = 0.5; % g2 has no upper limit but must be always higher than 0 (the Taylor principle)
+p.g2 = 0.5; % g2 has no upper limit but must be always higher then 0 (the Taylor principle)
 
 % policy reactiveness: the weight put on the output gap by the policy-makers 
-p.g3 = 0.5; % g3 has no upper limit but must be always higher than 0
+p.g3 = 0.5; % g3 has no upper limit but must be always higher then 0
 
 %-------- 4. Uncovered Interest Rate Parity (UIP)
 % L_S = (1-e1)*L_S{+1} + e1*(L_S{-1} + 2/4*(D4L_CPI_TAR - ss_DLA_CPI_RW + DLA_Z_BAR)) + (- RS + RS_RW + PREM)/4 + SHK_L_S;

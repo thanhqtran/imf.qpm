@@ -46,7 +46,7 @@ for i=1:length(listshocks)
 end
 
 %% Generate pdf report
-x = Report.new('Shocks');
+x = report.new('Shocks');
 
 % Figure style
 sty = struct();

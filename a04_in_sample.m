@@ -6,7 +6,7 @@
 close all;
 
 % clear workspace
-clearvars;
+% clearvars;
 
 % add folder "utils" on matlab path
 addpath utils

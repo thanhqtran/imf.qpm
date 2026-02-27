@@ -29,6 +29,7 @@ p.std_SHK_RS_RW        = 1;
 p.std_SHK_DLA_CPI_RW   = 2;
 p.std_SHK_RR_RW_BAR    = 0.5;
 
+% solve the model to load the initial condition at the steady state
 m = assign(m, p);
 m = solve(m);
 
@@ -62,6 +63,8 @@ simplan = plan(m, fcastrange); %plan command creates an object with the name sim
 % simplan = endogenize(simplan, qq(2014,1):qq(2016,4), {'SHK_RS_RW', 'SHK_DLA_CPI_RW', 'SHK_L_GDP_RW_GAP'});
 
 %% make a forecast
+% baseline: jforecast
+% s: the model object
 s = jforecast(m, h, fcastrange, 'plan', simplan, 'anticipate', true);
 
 s.mean = dbextend(h.mean, s.mean);

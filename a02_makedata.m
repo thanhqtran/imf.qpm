@@ -17,10 +17,10 @@ addpath utils
 % database 'd' 
 d = dbload('data.csv');
 
-%
+%% Seasonal adjustment
 
+d = dbbatch(d,'$1','x12(d.$0,Inf,''mode'',''m'')','namefilter','(.*)_U','fresh',false);
 
- 
 %% Make log of variables
 
 exceptions = {'RS','RS_RW','D4L_CPI_TAR'};
@@ -71,7 +71,7 @@ dbsave(d,'results/history.csv');
 
 %% Report - Stylized Facts
 disp('Generating Stylized Facts Report...');
-x = Report.new('Stylized Facts report');
+x = report.new('Stylized Facts report');
 
 % Figures
 rng = get(d.D4L_CPI,'range');

@@ -29,7 +29,7 @@ fcastrange = startfcast:endfcast;
 d = dbload('results/kalm_his.csv');
 
 % Loads the baseline scenario
-df = dbload('results/baseline.csv');
+df = dbload('results/baseline_hardtuning.csv');
 
 %re-take only shocks from baseline
 enames = get(m ,'enames');
@@ -54,7 +54,7 @@ simplan = plan(m,startfcast:endfcast);
 % d.SHK_L_GDP_GAP(startfcast:startfcast+3) = h.SHK_L_GDP_GAP(startfcast:startfcast+3) + [1, 1, 1, 1]';
 
 %% Tax increase
-% d.SHK_DLA_CPI(startfcast) = h.SHK_DLA_CPI(startfcast) + 1;
+d.SHK_DLA_CPI(startfcast) = h.SHK_DLA_CPI(startfcast) + 1;
 
 %% Sudden capital outflows
 % d.SHK_L_S(startfcast) = h.SHK_L_S(startfcast) + 1;
@@ -120,7 +120,7 @@ exchange = 'CZK/EUR';
 alternative = 'Alternative';
 
 %% Report
-x = Report.new(country,'marks',{'Baseline';'Alternative'});
+x = report.new(country,'marks',{'Baseline';'Alternative'});
 
 % Figures
 sty = struct();

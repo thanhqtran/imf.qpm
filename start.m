@@ -5,16 +5,14 @@
 % Get the directory of this script
 thisDir = fileparts(mfilename('fullpath'));
 
-%% ===========================================
-%% Change startup command depending on version
-%% ===========================================
+% Add relative paths
+% addpath(fullfile(thisDir, 'IRIS_Tbx_20181028'));
+% Start IRIS
+% irisstartup;
 
-% Run startup for 2018 version
-addpath(fullfile(thisDir, 'IRIS_Tbx_20181028'));
-irisstartup;
-
-% Run startup for 2021 version
+% Add relative paths
 addpath(fullfile(thisDir, 'IRIS-Toolbox-Legacy-20211206'));
+% Start IRIS
 iris.startup;
 
 % Clean up
