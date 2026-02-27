@@ -7,6 +7,8 @@ This set of codes is based on IMF's Quarterly Projection Model
 
 Please go to the site and enroll if you are interested. 
 
+The data is likely for the Czech Republic.
+
 
 ## What I added
 
