@@ -21,7 +21,7 @@ The script `readmodel_est.m` will replace `readmodel.m` in this case.
 Benes later added a System-priors approach ([here](https://github.com/jaromir-benes/nifi-workshop-202109)), which can only be implemented with IRIS 2021 onwards. 
 If you want to try this approach, run `a07_estimate_system` in the repo and remember to use IRIS 2021 instead of IRIS 2018.
 
-Based on [this repo](https://github.com/youarenadin/Replication-of-the-IMF-QPM-Model), I wrote a dynare implementation of the current QPM model. You can run `qpm_dynare.mod` via the command `dynare qpm_dynare.mod` (make sure to add DYNARE path first). Note that the end result is not very good because the Log-lik is about 4128, while other methods produce the Log-lik of about 622. I think there is semething wrong with my `dynare` code.
+Based on [this repo](https://github.com/youarenadin/Replication-of-the-IMF-QPM-Model), I wrote a dynare implementation of the current QPM model. You can run `qpm_dynare.mod` via the command `dynare qpm_dynare.mod` (make sure to add DYNARE path first). Note that the end result is not very good because the Log-lik is about -4128, while other methods produce the Log-lik of about -622. I think there is semething wrong with my `dynare` code.
 
 ## Comparison
 
