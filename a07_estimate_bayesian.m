@@ -131,41 +131,44 @@ enddate = qq(2013,1);
 
 %% Define priors for Bayesian estimation
 % For Bayesian estimation, we specify prior distributions for each parameter.
-% Format: {initial_value, lower_bound, upper_bound, 'distribution', prior_mean, prior_std}
-% Common distributions: 'beta' (for [0,1] bounded), 'gamma' (for positive), 'normal' (unbounded)
+% Format: {initial_value, lower_bound, upper_bound, distribution_object}
+% IRIS Legacy 2021: 4th element must be a distribution.Distribution object.
+% Use distribution.Beta.fromMeanStd(mean, std) or distribution.Gamma.fromMeanStd(mean, std)
 
 priors = struct();
 
 % Structural parameters
-% Use beta distribution for parameters bounded between 0 and 1
-priors.b1 = {p.b1, 0.1, 0.95, 'beta', p.b1, 0.15};  % output persistence
-priors.b2 = {p.b2, 0.1, 0.50, 'gamma', p.b2, 0.10};  % policy passthrough
-priors.b3 = {p.b3, 0.1, 0.70, 'gamma', p.b3, 0.15};  % impact of external demand
-priors.b4 = {p.b4, 0.3, 0.80, 'beta', p.b4, 0.15};   % weight in MCI
-priors.a1 = {p.a1, 0.4, 0.90, 'beta', p.a1, 0.15};   % inflation persistence
-priors.a2 = {p.a2, 0.1, 0.50, 'gamma', p.a2, 0.10};  % Phillips curve slope
-priors.a3 = {p.a3, 0.5, 0.90, 'beta', p.a3, 0.15};   % domestic cost weight
-priors.e1 = {p.e1, 0.0, 0.95, 'beta', p.e1, 0.20};   % UIP backward weight
-priors.g1 = {p.g1, 0.0, 0.80, 'beta', p.g1, 0.20};  % policy persistence
-priors.g2 = {p.g2, 0.01, 5.0, 'gamma', p.g2, 0.20}; % inflation response (Taylor rule)
-priors.g3 = {p.g3, 0.01, 5.0, 'gamma', p.g3, 0.20};  % output gap response (Taylor rule)
+priors.b1 = {p.b1, 0.1, 0.95, distribution.Beta.fromMeanStd(p.b1, 0.15)};  % output persistence
+priors.b2 = {p.b2, 0.1, 0.50, distribution.Gamma.fromMeanStd(p.b2, 0.10)}; % policy passthrough
+priors.b3 = {p.b3, 0.1, 0.70, distribution.Gamma.fromMeanStd(p.b3, 0.15)}; % impact of external demand
+priors.b4 = {p.b4, 0.3, 0.80, distribution.Beta.fromMeanStd(p.b4, 0.15)};  % weight in MCI
+priors.a1 = {p.a1, 0.4, 0.90, distribution.Beta.fromMeanStd(p.a1, 0.15)};  % inflation persistence
+priors.a2 = {p.a2, 0.1, 0.50, distribution.Gamma.fromMeanStd(p.a2, 0.10)}; % Phillips curve slope
+priors.a3 = {p.a3, 0.5, 0.90, distribution.Beta.fromMeanStd(p.a3, 0.15)};  % domestic cost weight
+priors.e1 = {p.e1, 0.0, 0.95, distribution.Beta.fromMeanStd(p.e1, 0.20)};  % UIP backward weight
+priors.g1 = {p.g1, 0.0, 0.80, distribution.Beta.fromMeanStd(p.g1, 0.20)};  % policy persistence
+priors.g2 = {p.g2, 0.01, 5.0, distribution.Gamma.fromMeanStd(p.g2, 0.20)}; % inflation response (Taylor rule)
+priors.g3 = {p.g3, 0.01, 5.0, distribution.Gamma.fromMeanStd(p.g3, 0.20)}; % output gap response (Taylor rule)
 
-% Persistence parameters (all use beta distribution as they are bounded [0,1])
-priors.rho_D4L_CPI_TAR = {p.rho_D4L_CPI_TAR, 0.1, 0.95, 'beta', p.rho_D4L_CPI_TAR, 0.15}; 
-priors.rho_DLA_Z_BAR = {p.rho_DLA_Z_BAR, 0.1, 0.95, 'beta', p.rho_DLA_Z_BAR, 0.15};
-priors.rho_DLA_GDP_BAR = {p.rho_DLA_GDP_BAR, 0.1, 0.95, 'beta', p.rho_DLA_GDP_BAR, 0.15};
-priors.rho_RR_BAR = {p.rho_RR_BAR, 0.1, 0.95, 'beta', p.rho_RR_BAR, 0.15};
-priors.rho_RR_RW_BAR = {p.rho_RR_RW_BAR, 0.1, 0.95, 'beta', p.rho_RR_RW_BAR, 0.15};
-priors.rho_L_GDP_RW_GAP = {p.rho_L_GDP_RW_GAP, 0.1, 0.95, 'beta', p.rho_L_GDP_RW_GAP, 0.15};
-priors.rho_RS_RW = {p.rho_RS_RW, 0.1, 0.95, 'beta', p.rho_RS_RW, 0.15};
-priors.rho_DLA_CPI_RW = {p.rho_DLA_CPI_RW, 0.1, 0.95, 'beta', p.rho_DLA_CPI_RW, 0.15};
+% Persistence parameters
+priors.rho_D4L_CPI_TAR  = {p.rho_D4L_CPI_TAR,  0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_D4L_CPI_TAR,  0.15)};
+priors.rho_DLA_Z_BAR    = {p.rho_DLA_Z_BAR,    0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_DLA_Z_BAR,    0.15)};
+priors.rho_DLA_GDP_BAR  = {p.rho_DLA_GDP_BAR,  0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_DLA_GDP_BAR,  0.15)};
+priors.rho_RR_BAR       = {p.rho_RR_BAR,       0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_RR_BAR,       0.15)};
+priors.rho_RR_RW_BAR    = {p.rho_RR_RW_BAR,    0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_RR_RW_BAR,    0.15)};
+priors.rho_L_GDP_RW_GAP = {p.rho_L_GDP_RW_GAP, 0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_L_GDP_RW_GAP, 0.15)};
+priors.rho_RS_RW        = {p.rho_RS_RW,        0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_RS_RW,        0.15)};
+priors.rho_DLA_CPI_RW   = {p.rho_DLA_CPI_RW,   0.1, 0.95, distribution.Beta.fromMeanStd(p.rho_DLA_CPI_RW,   0.15)};
 
 %% Bayesian Estimation
 % The estimate function with priors performs Bayesian estimation
 % It finds the posterior mode (MAP estimate) by maximizing the log-posterior
 fprintf('\nStarting Bayesian estimation (finding posterior mode)...\n');
 [Est, Poster, Table, Hess, MEst, V, Delta, PDelta] = estimate( ...
-    m, d, startdate:enddate, priors);
+    m, d, startdate:enddate, priors, ...
+    'NoSolution', 'penalty', ...
+    'EvalDataLik', 1, ...
+    'EvalIndiePriors', 1);
 
 fprintf('Bayesian estimation complete.\n\n');
 
