@@ -19,7 +19,9 @@ The approach is based on [A Cook-Book of IRIS](https://www.mv.helsinki.fi/home/a
 I adapted the codes there to produce `a07_estimate_mle` and `a07_estimate_bayesian` that perform the relevant estimation and then save the posterior mean into `pE`.
 The script `readmodel_est.m` will replace `readmodel.m` in this case.
 Benes later added a System-priors approach ([here](https://github.com/jaromir-benes/nifi-workshop-202109)), which can only be implemented with IRIS 2021 onwards. 
-If you want to try this approach, run `a07_estimate_system` in the repo and remember to use IRIS 2021 instead of IRIS 2018.
+If you want to try this approach, run `a07_estimate_system` in the repo and remember to use IRIS 2021 instead of IRIS 2018. 
+
+(Note: In the Bayesian estimation, the old 6-element format `{init, lb, ub, 'beta', mean, std}` worked in IRIS 2018 but will fail in the 2021 version. The 2021 version only accepts `distribution.Distribution` object, a function handle, or a numeric penalty as the 4th element. If we follow the old syntax, a plain string like `'beta'` doesn't match any of those checks and is ignored, leaving all priors as "Flat", and the estimation will default to MLE)
 
 Based on [this repo](https://github.com/youarenadin/Replication-of-the-IMF-QPM-Model), I wrote a dynare implementation of the current QPM model. You can run `qpm_dynare.mod` via the command `dynare qpm_dynare.mod` (make sure to add DYNARE path first). Note that the end result is not very good because the Log-lik is about -4128, while other methods produce the Log-lik of about -622. I think there is semething wrong with my `dynare` code.
 
