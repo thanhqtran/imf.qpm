@@ -35,33 +35,6 @@ The estimated model
 
 ![](https://github.com/thanhqtran/imf.qpm/blob/76b631445f117985a0264d72f0cca351faadcfaa/estimate.png)
 
-| Parameter            | Calibrated | Estimated |
-|----------------------|------------|------------|
-| ss_DLA_GDP_BAR       | 2.5000     | 2.5000     |
-| ss_D4L_CPI_TAR       | 2.0000     | 2.0000     |
-| ss_RR_BAR            | 0.5000     | 0.5000     |
-| ss_DLA_Z_BAR         | -1.5000    | -1.5000    |
-| ss_DLA_CPI_RW        | 2.0000     | 2.0000     |
-| ss_RR_RW_BAR         | 0.7500     | 0.7500     |
-| b1                   | 0.8000     | 0.5052     |
-| b2                   | 0.3000     | 0.1000     |
-| b3                   | 0.5000     | 0.5794     |
-| b4                   | 0.7000     | 0.8000     |
-| a1                   | 0.7000     | 0.4000     |
-| a2                   | 0.2000     | 0.1000     |
-| a3                   | 0.7000     | 0.7064     |
-| g1                   | 0.7000     | 0.8000     |
-| g2                   | 0.5000     | 0.0621     |
-| g3                   | 0.5000     | 0.3563     |
-| e1                   | 0.4000     | 0.2566     |
-| rho_D4L_CPI_TAR      | 0.5000     | 0.9500     |
-| rho_DLA_Z_BAR        | 0.8000     | 0.9500     |
-| rho_DLA_GDP_BAR      | 0.8000     | 0.9289     |
-| rho_RR_BAR           | 0.8000     | 0.9500     |
-| rho_RR_RW_BAR        | 0.8000     | 0.9500     |
-| rho_L_GDP_RW_GAP     | 0.8000     | 0.9423     |
-| rho_RS_RW            | 0.8000     | 0.9500     |
-| rho_DLA_CPI_RW       | 0.8000     | 0.3604     |
 
 ## How to run stuff
 
