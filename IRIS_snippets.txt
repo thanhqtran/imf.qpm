@@ -1,0 +1,113 @@
+# ===========================================
+# load data
+# this will create a struct object (structure)
+d = dbload('data.csv')
+
+# save data
+dbsave(d, 'data.csv')
+
+# refer to specific entry 
+d.GDP
+
+# create an empty database
+dnew = struct()
+
+# remove an entry
+# two inputs: database and the name of the entry we want to remove
+d = rmfield(d, 'entry_name')
+
+# create time series
+# two inputs: time range, values
+ts1 = tseries( mm(2018,1):mm(2018,6), [ 1 2 3 4 5 6 ])
+ts2 = tseries( qq(2018,1):qq(2018,3), [ 1 2 3 ])
+
+# change the value of a specific date
+ts1(mm(2018,3)) = 10
+
+# retrieve values from time series
+## retaining the time series structure
+vals = ts1{ mm(2018,2):mm(2018,4) }
+# retrieve values (to store in a matrix)
+vals = ts1( mm(2018,2):mm(2018,4) )
+# retrieve information from time series
+## for example, dates
+get(ts1, 'range')
+
+# stack time series horizontally
+ts4 = [ts1 ts2]
+# stack time series vertically
+ts5 = [ts1; ts2]
+
+# ==========================================
+# seasonal adjustment
+
+dt.CPI_SA = x13(dt.CPI_U);
+
+(*) if this does not work
+1. locate the executable from the error message:
+/Users/quang-thanhtran/Cloud-Drive/4.My_Notes/IMF QPM/codes/Model_MPAFx (Module 4)/IRIS_Tbx_20181028/+thirdparty/+x13/x13asmac
+2. grant execution permission
+chmod +x "/Users/quang-thanhtran/Cloud-Drive/4.My_Notes/IMF QPM/codes/Model_MPAFx (Module 4)/IRIS_Tbx_20181028/+thirdparty/+x13/x13asmac"
+3. if it still does not work
+xattr -d com.apple.quarantine "/Users/quang-thanhtran/Cloud-Drive/4.My_Notes/IMF QPM/codes/Model_MPAFx (Module 4)/IRIS_Tbx_20181028/+thirdparty/+x13/x13asmac"
+
+
+# ===========================================
+# convert time series
+## convert to lower frequency (eg. from quarter to annual) 
+CPI_A = convert(d.CPI_Q, 'y', Inf, 'method', @mean)
+
+- 'mean' = mean of the values from all periods which fall into the desired period
+- 'first' = value of the first period
+- 'last' = value of the last period
+
+## convert to higher frequency (eg. from annual to quarter)
+CPI_Q = convert(d.CPI_A, 'q', Inf, 'method', 'quadavg')
+
+- 'cubic' = cubic interpolation with low frequency value in the middle of the higher frequency grid
+- 'quadsum' = quadratic interpolation such that the sum of the interpolated values matches the value of the original series in the respective lower frequency period
+- 'quadavg' = quadratic interpolation such that average of the interpolated values matches value of the original series in the repsective lower frequency period
+
+
+# ===========================================
+# calculating growth rate
+## traditional way
+gdp_growth = 100*(d.GDP/d.GDP{-1} - 1);
+## using pct()
+gdp_growth = pct(d.GDP);
+## using approximation (log diff), good for log-linearized vars
+d.LGDP = log(d.GDP);
+gdp_growth = diff(d.LGDP);
+
+
+# ===========================================
+# batch convert/transform data
+- inputs: current database
+- batch names: $0_growth where the dollar sign indicates pattern, 0 is the original name, and the rest is what will be added
+
+## for all series
+db_new = dbbatch(d, '$0_growth', 'pct(d.$0)')
+## for only some selected series
+db = dbbatch(d, '$0_growth', 'pct(d.$0)', 'namelist', {'GDP_RW', 'CPI_RW'})
+## for only series with certain patterns (regex)
+eg. only the variables ending with RW
+db_new = dbbatch(d, '$0_growth', 'pct(d.$0)', 'namefilter', '.*_RW')
+
+#============================================
+Hodrick-Prescott Filter
+
+[LGDP_trend, LGDP_gap] = hpf(d.GDP)
+[LGDP_trend, LGDP_gap] = hpf(d.GDP, 'lambda', 1600);
+## if we want to limit the range
+[LGDP_trend, LGDP_gap] = hpf(d.GDP, qq(1996,1):qq(2008,3) );
+## we can use the option argument called level, which allows us to set the value of the trend in any period.
+[LGDP_trend, LGDP_gap] = hpf(d.GDP, qq(1996,1):qq(2008,3),'level',d.LGDP{qq(2008.3)}-4 );
+
+#============================================
+The Band-Pass Filter
+- filter noise by frequency bands of choice
+- only works with log series
+
+LGDP_trend_bp = bpass(d.LGDP, [32 Inf]);	%long cycle (trend)
+LGDP_gap_bp = bpass(d.GDP, [6 32]);		%moderate cycles (gap)
+LGDP_noise_bp = bpass(d.GDP, [2 6]);		%very short cycle (noise)
