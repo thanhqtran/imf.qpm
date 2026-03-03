@@ -1,14 +1,26 @@
-start
+%%% ==========================
+%%% Hardtuning forecast ------
+%%% ==========================
 
-a01_modelproperties
+% Clear all
+clear all; clc;
 
-a02_makedata
+%% Initiate IRIS Toolbox
+% Make sure 2021 version is selected
+start;
 
-a03_kalmanfilter
+%% Make data
+% this includes importing dataframes, applying seasonal adjustments and apply band-pass or HP filter
+a02_makedata;
 
-a07_estimation
+%% Perform Bayesian estimation
+a07_estimate_bayesian;
+% if you prefer another estimation, choose
+% a07_estimate_mle;
+% a07_estimate_system;
 
-% MLE estimation
-a07_estimate_mle
-% Bayesian estimation
-a07_estimate_bayes
+%% Apply the Kalman filter and decompositional analysis
+a03_kalmanfilter_est;
+
+%% Forecast with hard tuning based on foreign exogenous variables
+a05_video_forecast_est;
